@@ -1,0 +1,109 @@
+/**
+ * 독서모임 참여 신청서 자동 생성 스크립트
+ * https://script.google.com 에 붙여넣고 createBookClubForm 을 실행하세요.
+ * 실행할 때마다 새 폼이 하나씩 만들어집니다.
+ */
+
+// ▼ 여기 대괄호 부분을 실제 내용으로 바꾼 뒤 실행하세요.
+var INFO = {
+  name: '[모임 이름]',
+  schedule: '[요일과 시간]',
+  place: '[모임 장소]',
+  fee: '[참가비]',
+  deadline: '[모집 마감일]',
+  contactTiming: '[연락 방법과 시기]',
+  keepUntil: '[개인정보 보관 기간]'
+};
+
+function createBookClubForm() {
+  var form = FormApp.create(INFO.name + ' 참여 신청서');
+  form.setDescription(
+    '함께 읽을 사람을 찾아요.\n\n' +
+    '· 일시: ' + INFO.schedule + '\n' +
+    '· 장소: ' + INFO.place + '\n' +
+    '· 참가비: ' + INFO.fee + '\n' +
+    '· 신청 마감: ' + INFO.deadline
+  );
+
+  // 1. 개인정보 동의
+  form.addSectionHeaderItem()
+    .setTitle('개인정보 수집·이용 안내')
+    .setHelpText(
+      '· 수집 항목: 이름(닉네임), 휴대폰 번호, 신청서 답변\n' +
+      '· 이용 목적: 참여자 선정과 모임 안내\n' +
+      '· 보관 기간: ' + INFO.keepUntil + ' (이후 삭제)\n' +
+      '· 동의하지 않을 수 있으며, 이 경우 신청이 어렵습니다.'
+    );
+  form.addCheckboxItem()
+    .setTitle('개인정보 수집·이용에 동의하시나요?')
+    .setChoiceValues(['동의합니다'])
+    .setRequired(true);
+
+  // 2. 기본 정보
+  form.addPageBreakItem().setTitle('기본 정보');
+  form.addTextItem()
+    .setTitle('이름 또는 닉네임')
+    .setRequired(true);
+  var phoneRule = FormApp.createTextValidation()
+    .requireTextMatchesPattern('01[016789]-?[0-9]{3,4}-?[0-9]{4}')
+    .setHelpText('010-1234-5678 형식으로 입력해 주세요.')
+    .build();
+  form.addTextItem()
+    .setTitle('휴대폰 번호')
+    .setHelpText('예: 010-1234-5678')
+    .setValidation(phoneRule)
+    .setRequired(true);
+
+  // 3. 참여 가능 여부
+  form.addPageBreakItem().setTitle('참여 가능 여부');
+  form.addMultipleChoiceItem()
+    .setTitle('모임 일시와 장소에 참석할 수 있나요?')
+    .setHelpText(INFO.schedule + ' / ' + INFO.place)
+    .setChoiceValues(['매번 참석할 수 있어요', '대부분 참석할 수 있어요', '일정에 따라 달라져요'])
+    .setRequired(true);
+  form.addCheckboxItem()
+    .setTitle('참가비를 확인해 주세요.')
+    .setHelpText('참가비: ' + INFO.fee)
+    .setChoiceValues(['확인했습니다'])
+    .setRequired(true);
+
+  // 4. 독서 취향
+  form.addPageBreakItem().setTitle('독서 이야기');
+  form.addCheckboxItem()
+    .setTitle('즐겨 읽는 분야를 모두 골라 주세요.')
+    .setChoiceValues(['소설', '시·에세이', '인문·철학', '사회·역사', '과학', '경제·경영', '자기계발', '아직 찾는 중'])
+    .showOtherOption(true)
+    .setRequired(true);
+  form.addMultipleChoiceItem()
+    .setTitle('한 달에 책을 몇 권 정도 읽나요?')
+    .setChoiceValues(['1권 미만', '1권', '2~3권', '4권 이상'])
+    .setRequired(true);
+  form.addTextItem()
+    .setTitle('최근 인상 깊게 읽은 책이 있다면 알려 주세요.');
+  form.addTextItem()
+    .setTitle('모임에서 함께 읽고 싶은 책이 있나요?');
+
+  // 5. 모임에 바라는 점
+  form.addPageBreakItem().setTitle('모임에 바라는 점');
+  form.addParagraphTextItem()
+    .setTitle('독서모임에 신청한 이유를 들려 주세요.')
+    .setHelpText('짧게 적어도 괜찮아요.')
+    .setRequired(true);
+  form.addCheckboxItem()
+    .setTitle('모임에서 기대하는 것은 무엇인가요?')
+    .setChoiceValues(['꾸준한 독서 습관', '다양한 생각 나누기', '새로운 분야의 책 만나기', '좋은 사람들과의 교류'])
+    .showOtherOption(true);
+  form.addMultipleChoiceItem()
+    .setTitle('모집 소식을 어디에서 알게 되었나요?')
+    .setChoiceValues(['지인 소개', 'SNS', '온라인 커뮤니티', '오프라인 홍보물'])
+    .showOtherOption(true);
+  form.addParagraphTextItem()
+    .setTitle('궁금한 점이나 하고 싶은 말이 있다면 적어 주세요.');
+
+  form.setConfirmationMessage(
+    '신청해 주셔서 고맙습니다.\n안내 연락: ' + INFO.contactTiming
+  );
+
+  Logger.log('폼 편집 주소: ' + form.getEditUrl());
+  Logger.log('신청자에게 보낼 주소: ' + form.getPublishedUrl());
+}
